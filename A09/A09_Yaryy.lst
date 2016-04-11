@@ -1,0 +1,265 @@
+--------------
+/* Rodion Yaryy */
+    /* enable warnings! */
+
+use bkorders
+--------------
+
+Query OK, 0 rows affected (0.00 sec)
+
+--------------
+/*  TASK 00 */ 
+select user(), current_date(), version(), @@sql_mode
+--------------
+
+*************************** 1. row ***************************
+        user(): root@localhost
+current_date(): 2016-04-04
+     version(): 5.7.10
+    @@sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+1 row in set (0.01 sec)
+
+--------------
+/*  TASK 01 */
+select (sum(quantity * order_price)) as AmtDue
+from order_details
+where book_id in (1108)
+--------------
+
++----------+
+| AmtDue   |
++----------+
+| 28410.30 |
++----------+
+1 row in set (0.00 sec)
+
+--------------
+/*  TASK 02 */
+select 
+  count(OD.order_id) as NumberOfOrders
+from order_details OD
+inner join order_headers OH on OD.order_id = OH.order_id
+where book_id in (1108)
+and YEAR(order_date) = YEAR((CURDATE()-1))
+--------------
+
++----------------+
+| NumberOfOrders |
++----------------+
+|              1 |
++----------------+
+1 row in set (0.00 sec)
+
+--------------
+/* TASK 03 */
+select 
+  cust_id as CustID
+, cust_name_last as CustName
+, sum(quantity) as BookTotal
+, sum(case when YEAR(order_date) = YEAR(CURDATE()) then quantity else NULL end) as CurrentYearBookTotal
+from customers
+left join order_headers using (cust_id)
+left join order_details using (order_id)
+group by cust_id
+--------------
+
++--------+--------------+-----------+----------------------+
+| CustID | CustName     | BookTotal | CurrentYearBookTotal |
++--------+--------------+-----------+----------------------+
+| 200368 | Blake        |      1110 |                  605 |
+| 202958 | Denver       |      NULL |                 NULL |
+| 208950 | Adams        |        20 |                   10 |
+| 211483 | Carroll      |       102 |                 NULL |
+| 212921 | Books on Tap |       153 |                  102 |
+| 217002 | Grieg        |      NULL |                 NULL |
+| 217796 | Anders       |       227 |                  166 |
+| 218709 | Bonnard      |       326 |                  169 |
+| 221297 | Dodgson      |        54 |                   13 |
+| 222477 | Rossetti     |       145 |                   70 |
+| 224038 | Austin       |       111 |                   56 |
+| 226275 | Dalrymple    |      NULL |                 NULL |
+| 226656 | Randall      |       291 |                 NULL |
+| 227105 | Kafka        |      2572 |                  271 |
+| 228175 | Cardin       |        17 |                    8 |
+| 228275 | Mikulski     |      NULL |                 NULL |
+| 228352 | Edwards      |      NULL |                 NULL |
+| 234138 | Keats        |       190 |                   86 |
+| 234709 | Brahms       |        69 |                   69 |
+| 239427 | Marksa       |       485 |                  257 |
+| 255919 | Milton       |      NULL |                 NULL |
+| 258595 | Jobs         |         4 |                 NULL |
+| 259906 | Capybara     |       747 |                   16 |
+| 259907 | Hedge        |      NULL |                 NULL |
+| 259969 | Carlsen      |        16 |                   11 |
+| 260368 | Muller       |        17 |                    5 |
+| 261502 | Hawthorne    |      1004 |                  703 |
+| 263119 | Jones        |       606 |                  564 |
+| 267780 | Shelly       |       750 |                  292 |
+| 272611 | Jarrett      |        15 |                   11 |
+| 272787 | Carlson      |       621 |                   74 |
+| 276381 | Collins      |       205 |                  154 |
+| 282716 | Biederbecke  |      1277 |                  171 |
+| 287261 | Biederbecke  |      NULL |                 NULL |
+| 290298 | Swift        |       629 |                  276 |
+| 296598 | Collins      |         2 |                 NULL |
+| 299099 | Sam          |       351 |                  350 |
++--------+--------------+-----------+----------------------+
+37 rows in set (0.00 sec)
+
+--------------
+/* TASK 04 */
+select 
+   @last_quarter := IF((QUARTER(CURDATE( ))-1) = 0, 4, QUARTER(CURDATE( ))-1) as PreviousQuarterNumber
+,  @last_year:=IF(@last_quarter = 4, YEAR(NOW( ))-1, YEAR(NOW( ))) as YearOfPreviousQuarter
+,  count(case when QUARTER(order_date) = @last_quarter 
+  and year(order_date) = @last_year then 1 end
+  ) as NumberOfOrdersLastQuarter
+,  count(distinct (
+  case when QUARTER(order_date) = @last_quarter and year(order_date) = @last_year then cust_id end
+    )) as CustomersLastQuarter
+from order_headers
+join customers using (cust_id)
+--------------
+
++-----------------------+-----------------------+---------------------------+----------------------+
+| PreviousQuarterNumber | YearOfPreviousQuarter | NumberOfOrdersLastQuarter | CustomersLastQuarter |
++-----------------------+-----------------------+---------------------------+----------------------+
+|                     1 |                  2016 |                        85 |                   25 |
++-----------------------+-----------------------+---------------------------+----------------------+
+1 row in set (0.00 sec)
+
+--------------
+/* TASK 05 */
+select book_id
+, title
+from bkinfo.books BKS
+join bkinfo.book_topics using(book_id)
+join bkorders.order_details OD using (book_id)
+where topic_id in ('NOSQL','XML','DB')
+group by book_id
+order by count(book_id) desc
+limit 1
+--------------
+
++---------+----------------------------------------+
+| book_id | title                                  |
++---------+----------------------------------------+
+|    1128 | Temporal Data and the Relational Model |
++---------+----------------------------------------+
+1 row in set (0.00 sec)
+
+--------------
+/* TASK 06 */
+select
+   sum(case when topic_id in ('SCI') then 1 end) as 'Science'
+,  sum(case when topic_id in ('DB','SQL','SSRV','MySQL','ORA','ADO') then 1 end) as 'Database Systems'
+,  sum(case when topic_id in ('NOSQL','XML','DB') then 1 end) as 'Data Storage Techniques'
+,  count(topic_id) as 'All Books'
+from bkinfo.books
+join bkinfo.book_topics using(book_id)
+--------------
+
++---------+------------------+-------------------------+-----------+
+| Science | Database Systems | Data Storage Techniques | All Books |
++---------+------------------+-------------------------+-----------+
+|      22 |               57 |                      12 |       120 |
++---------+------------------+-------------------------+-----------+
+1 row in set (0.00 sec)
+
+--------------
+/* TASK 07 */
+select 
+  cust_id as CustID
+, cust_name_last as CustName
+, if (max(order_date is null) = 0, max(order_date), 'No Orders') as MostRecentOrder
+from order_headers
+right join customers using(cust_id) 
+group by cust_id
+--------------
+
++--------+--------------+-----------------+
+| CustID | CustName     | MostRecentOrder |
++--------+--------------+-----------------+
+| 200368 | Blake        | 2016-07-28      |
+| 202958 | Denver       | No Orders       |
+| 208950 | Adams        | 2016-03-28      |
+| 211483 | Carroll      | 2015-11-24      |
+| 212921 | Books on Tap | 2016-03-22      |
+| 217002 | Grieg        | No Orders       |
+| 217796 | Anders       | 2016-05-06      |
+| 218709 | Bonnard      | 2016-03-25      |
+| 221297 | Dodgson      | 2016-05-06      |
+| 222477 | Rossetti     | 2016-08-12      |
+| 224038 | Austin       | 2016-03-23      |
+| 226275 | Dalrymple    | No Orders       |
+| 226656 | Randall      | 2015-08-25      |
+| 227105 | Kafka        | 2016-06-30      |
+| 228175 | Cardin       | 2016-02-20      |
+| 228275 | Mikulski     | No Orders       |
+| 228352 | Edwards      | No Orders       |
+| 234138 | Keats        | 2016-03-08      |
+| 234709 | Brahms       | 2016-03-22      |
+| 239427 | Marksa       | 2016-03-31      |
+| 255919 | Milton       | No Orders       |
+| 258595 | Jobs         | 2015-09-20      |
+| 259906 | Capybara     | 2016-04-04      |
+| 259907 | Hedge        | No Orders       |
+| 259969 | Carlsen      | 2016-01-08      |
+| 260368 | Muller       | 2016-03-05      |
+| 261502 | Hawthorne    | 2016-06-29      |
+| 263119 | Jones        | 2016-03-28      |
+| 267780 | Shelly       | 2016-08-11      |
+| 272611 | Jarrett      | 2016-03-10      |
+| 272787 | Carlson      | 2016-08-13      |
+| 276381 | Collins      | 2016-05-03      |
+| 282716 | Biederbecke  | 2016-08-13      |
+| 287261 | Biederbecke  | No Orders       |
+| 290298 | Swift        | 2016-07-15      |
+| 296598 | Collins      | 2015-09-20      |
+| 299099 | Sam          | 2016-02-03      |
++--------+--------------+-----------------+
+37 rows in set (0.00 sec)
+
+--------------
+/* TASK 08 */
+select 
+  cust_id as CustID
+, cust_name_last as CustName
+from customers
+join order_headers using (cust_id)
+join order_details using (order_id)
+where cust_id not in (
+  select cust_id
+  from order_headers
+  join order_details using (order_id)
+    where book_id = 1142
+) AND cust_id in (
+  select cust_id 
+    from order_headers
+  join order_details using (order_id)
+    join bkinfo.book_topics using (book_id)
+    where topic_id in ('SQL')
+)  
+group by cust_id
+having sum((quantity * order_price)) > 500
+--------------
+
++--------+-----------+
+| CustID | CustName  |
++--------+-----------+
+| 211483 | Carroll   |
+| 217796 | Anders    |
+| 218709 | Bonnard   |
+| 224038 | Austin    |
+| 234138 | Keats     |
+| 234709 | Brahms    |
+| 239427 | Marksa    |
+| 261502 | Hawthorne |
+| 263119 | Jones     |
+| 272611 | Jarrett   |
+| 272787 | Carlson   |
+| 276381 | Collins   |
++--------+-----------+
+12 rows in set (0.00 sec)
+
+Bye

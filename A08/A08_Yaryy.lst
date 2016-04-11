@@ -1,0 +1,236 @@
+/* Rodion Yaryy */
+\W    /* enable warnings! */
+Show warnings enabled.
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+use bkorders; 
+Database changed
+
+/*  TASK 00 */ 
+select user(), current_date(), version(), @@sql_mode\G
+*************************** 1. row ***************************
+        user(): root@localhost
+current_date(): 2016-03-23
+     version(): 5.7.10
+    @@sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+1 row in set (0.00 sec)
+
+/*  TASK 01 */
+drop view if exists bkorders.BkOrdersPriorYear;
+
+create view bkorders.BkOrdersPriorYear as (
+    select  
+  CT.cust_id as customerID
+,   case when cust_name_first is null then concat(cust_name_last)
+     when cust_name_first is null AND cust_name_last is null then 'no name'
+     else concat(cust_name_last, ', ', cust_name_first)
+     end as customerName
+,    OH.order_date as full_date
+,    date_format(OH.order_date,'%M') as order_month
+,    order_id  
+from customers CT
+join order_headers OH on OH.cust_id = CT.cust_id
+where YEAR(order_date) = YEAR(CURDATE()) - 1   
+);  
+Query OK, 0 rows affected (0.01 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+use bkorders;
+Database changed
+
+/*  TASK 02 */
+select customerID, customerName
+from bkordersprioryear
+where order_month = 'April'
+union
+select customerID, customerName
+from bkordersprioryear
+where order_month = 'June'
+union
+select customerID, customerName
+from bkordersprioryear
+where order_month = 'August';
++------------+----------------------+
+| customerID | customerName         |
++------------+----------------------+
+|     212921 | Books on Tap         |
+|     234138 | Keats, John          |
+|     272787 | Carlson, Ben         |
+|     276381 | Collins, Douglas     |
+|     200368 | Blake, William       |
+|     221297 | Dodgson, Charles     |
+|     222477 | Rossetti, Christina  |
+|     226656 | Randall, Randell     |
+|     227105 | Kafka, Franz         |
+|     259906 | Capybara, Wile E.    |
+|     261502 | Hawthorne, Nathaniel |
+|     263119 | Jones                |
+|     267780 | Shelly, Mary         |
+|     290298 | Swift, Jonathan      |
+|     218709 | Bonnard, Paul        |
++------------+----------------------+
+15 rows in set (0.00 sec)
+
+/* TASK 03 */
+select customerID, customerName
+from bkordersprioryear
+where customerID not in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'March'
+)
+AND customerID not in(
+  select customerID
+  from bkordersprioryear
+  where order_month = 'June'
+)
+AND customerID not in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'September'
+);
++------------+------------------+
+| customerID | customerName     |
++------------+------------------+
+|     208950 | Adams, Samuel    |
+|     224038 | Austin, Pat      |
+|     224038 | Austin, Pat      |
+|     228175 | Cardin, Benjamin |
+|     228175 | Cardin, Benjamin |
++------------+------------------+
+5 rows in set (0.01 sec)
+
+/* TASK 04 */
+select distinct customerID, customerName
+from bkordersprioryear
+where customerID in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'March'
+)
+AND customerID in(
+  select customerID
+  from bkordersprioryear
+  where order_month = 'June'
+)
+AND customerID in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'September'
+);
++------------+----------------------+
+| customerID | customerName         |
++------------+----------------------+
+|     261502 | Hawthorne, Nathaniel |
+|     272787 | Carlson, Ben         |
++------------+----------------------+
+2 rows in set (0.00 sec)
+
+/* TASK 05 */
+select distinct customerID, customerName
+from bkordersprioryear
+where customerID in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'January'
+)
+AND customerID not in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'February'
+)
+AND customerID not in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'March'
+);
++------------+-------------------+
+| customerID | customerName      |
++------------+-------------------+
+|     226656 | Randall, Randell  |
+|     259906 | Capybara, Wile E. |
++------------+-------------------+
+2 rows in set (0.00 sec)
+
+
+/* TASK 06 */
+select distinct customerID, customerName, order_month
+from bkordersprioryear
+where customerID in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'March'
+)
+AND customerID in (
+  select customerID
+  from bkordersprioryear
+  where customerID in (
+    select customerID
+    from bkordersprioryear
+    where order_month = 'April'
+    )
+    OR customerID in (
+    select customerID
+  from bkordersprioryear
+    where customerID in (
+    select customerID
+    from bkordersprioryear
+    where order_month = 'May'
+    )
+  )
+);
++------------+------------------+-------------+
+| customerID | customerName     | order_month |
++------------+------------------+-------------+
+|     234138 | Keats, John      | March       |
+|     234138 | Keats, John      | April       |
+|     234138 | Keats, John      | November    |
+|     272787 | Carlson, Ben     | February    |
+|     272787 | Carlson, Ben     | March       |
+|     272787 | Carlson, Ben     | April       |
+|     272787 | Carlson, Ben     | November    |
+|     272787 | Carlson, Ben     | June        |
+|     272787 | Carlson, Ben     | July        |
+|     272787 | Carlson, Ben     | September   |
+|     272787 | Carlson, Ben     | December    |
+|     276381 | Collins, Douglas | March       |
+|     276381 | Collins, Douglas | April       |
++------------+------------------+-------------+
+13 rows in set (0.00 sec)
+
+
+/* TASK 07 */
+select distinct customerID, customerName, order_month
+from bkordersprioryear
+where customerID in (
+  select customerID
+  from bkordersprioryear
+  where customerID in (
+    select customerID
+    from bkordersprioryear
+    where order_month = 'April'
+    )
+    AND customerID in (
+    select customerID
+    from bkordersprioryear
+    where customerID in (
+    select customerID
+    from bkordersprioryear
+    where order_month = 'May'
+    )
+  )
+) AND customerID not in (
+  select customerID
+  from bkordersprioryear
+  where order_month = 'June'
+);
++------------+--------------+-------------+
+| customerID | customerName | order_month |
++------------+--------------+-------------+
+|     212921 | Books on Tap | April       |
+|     212921 | Books on Tap | May         |
+|     212921 | Books on Tap | September   |
++------------+--------------+-------------+
+3 rows in set (0.01 sec)

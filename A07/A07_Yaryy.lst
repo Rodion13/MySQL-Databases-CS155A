@@ -1,0 +1,299 @@
+Show warnings enabled.
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+
+/*  TASK 00 */ 
+select user(), current_date(), version(), @@sql_mode\G
+
+Database changed
+*************************** 1. row ***************************
+        user(): root@localhost
+current_date(): 2016-03-16
+     version(): 5.7.10
+    @@sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+1 row in set (0.00 sec)
+
+
+/*  TASK 01 */
+select CL.cl_id, cl_name_last, AN.an_id, an_type, an_name
+from vt_clients CL
+left join vt_animals AN on CL.cl_id = AN.cl_id;
+
++-------+--------------+-------+-----------+-----------------+
+| cl_id | cl_name_last | an_id | an_type   | an_name         |
++-------+--------------+-------+-----------+-----------------+
+|   254 | Boston       |  NULL | NULL      | NULL            |
+|   411 | Carter       | 15165 | dog       | Burgess         |
+|   411 | Carter       | 15401 | lizard    | Pinkie          |
+|   411 | Carter       | 21001 | hedgehog  | Yoggie          |
+|  1825 | Harris       | 16003 | cat       | Ursula          |
+|  1825 | Harris       | 16043 | dog       | Ursula          |
+|  1825 | Harris       | 16044 | dog       | Triton          |
+|  1825 | Harris       | 21002 | hedgehog  | Edger           |
+|  1852 | Dalrymple    | 21007 | snake     | Pop 22          |
+|  1852 | Dalrymple    | 21320 | olinguito | Morris          |
+|  1852 | Dalrymple    | 21321 | olinguito | Morton          |
+|  3423 | Hawkins      | 16002 | porcupine | Fritz           |
+|  3423 | Hawkins      | 21005 | dormouse  | Koshka          |
+|  3423 | Hawkins      | 21006 | hamster   | Koshka          |
+|  3560 | Monk         | 10002 | cat       | Gutsy           |
+|  3560 | Monk         | 11015 | bird      | Kenny           |
+|  3560 | Monk         | 11025 | bird      | NULL            |
+|  3560 | Monk         | 11028 | bird      | NULL            |
+|  3560 | Monk         | 11029 | bird      | NULL            |
+|  3560 | Monk         | 12035 | bird      | Mr Peanut       |
+|  3560 | Monk         | 12038 | porcupine | Gutsy           |
+|  3561 | Pickett      | 15001 | turtle    | Big Mike        |
+|  3561 | Pickett      | 17025 | lizard    | 25              |
+|  3561 | Pickett      | 21004 | snake     | Gutsy           |
+|  4087 | Turrentine   | 21305 | dog       | Spot            |
+|  4087 | Turrentine   | 21306 | dog       | Shadow          |
+|  4087 | Turrentine   | 21307 | dog       | Buddy           |
+|  4087 | Turrentine   | 21314 | cat       | Adalwine        |
+|  4534 | Montgomery   | 21315 | cat       | Baldric         |
+|  5686 | Biederbecke  |  NULL | NULL      | NULL            |
+|  5689 | Biederbecke  | 21205 | dog       | Manfried        |
+|  5698 | Biederbecke  | 21316 | cat       | Etta            |
+|  5698 | Biederbecke  | 21317 | cat       | Manfried        |
+|  5698 | Biederbecke  | 21318 | cat       | Waldrom         |
+|  5699 | Biederbecke  | 15002 | turtle    | George          |
+|  5699 | Biederbecke  | 17002 | porcupine | Fritzchen       |
+|  6426 | Hawkins      | 19845 | dog       | Pinkie          |
+|  6426 | Hawkins      | 21003 | dog       | Calvin Coolidge |
+|  6897 | Drake        |  NULL | NULL      | NULL            |
+|  7152 | Brubeck      | 17026 | lizard    | 3P#_26          |
+|  7152 | Brubeck      | 17027 | lizard    | 3P#_25          |
+|  7212 | Davis        |  NULL | NULL      | NULL            |
++-------+--------------+-------+-----------+-----------------+
+42 rows in set (0.00 sec)
+
+
+/* TAST 02 */ 
+select AN.an_id, an_type, ex_id, YEAR(ex_date), stf_id
+from vt_animals AN
+left join vt_exam_headers EH on AN.an_id = EH.an_id; 
+
++-------+-----------+-------+---------------+--------+
+| an_id | an_type   | ex_id | YEAR(ex_date) | stf_id |
++-------+-----------+-------+---------------+--------+
+| 11015 | bird      |  NULL |          NULL |   NULL |
+| 11025 | bird      |  NULL |          NULL |   NULL |
+| 11028 | bird      |  3002 |          2015 |     38 |
+| 11029 | bird      |  3003 |          2015 |     38 |
+| 12035 | bird      |  3104 |          2016 |     38 |
+| 10002 | cat       |  2352 |          2015 |     38 |
+| 16003 | cat       |  3413 |          2015 |     15 |
+| 16003 | cat       |  3420 |          2016 |     15 |
+| 16003 | cat       |  3552 |          2015 |     15 |
+| 16003 | cat       |  3612 |          2015 |     15 |
+| 21314 | cat       |  NULL |          NULL |   NULL |
+| 21315 | cat       |  NULL |          NULL |   NULL |
+| 21316 | cat       |  2300 |          2015 |     38 |
+| 21317 | cat       |  4612 |          2015 |     15 |
+| 21318 | cat       |  NULL |          NULL |   NULL |
+| 15165 | dog       |  NULL |          NULL |   NULL |
+| 16043 | dog       |  NULL |          NULL |   NULL |
+| 16044 | dog       |  NULL |          NULL |   NULL |
+| 19845 | dog       |  3390 |          2015 |     15 |
+| 21003 | dog       |  3392 |          2015 |     15 |
+| 21205 | dog       |  NULL |          NULL |   NULL |
+| 21305 | dog       |  NULL |          NULL |   NULL |
+| 21306 | dog       |  2228 |          2015 |     38 |
+| 21307 | dog       |  2205 |          2015 |     38 |
+| 21005 | dormouse  |  3486 |          2015 |     15 |
+| 21006 | hamster   |  2389 |          2015 |     38 |
+| 21001 | hedgehog  |  4282 |          2015 |     15 |
+| 21002 | hedgehog  |  NULL |          NULL |   NULL |
+| 15401 | lizard    |  3513 |          2015 |     15 |
+| 17025 | lizard    |  3202 |          2015 |     29 |
+| 17025 | lizard    |  3306 |          2015 |     29 |
+| 17025 | lizard    |  3324 |          2016 |     29 |
+| 17025 | lizard    |  3411 |          2015 |     29 |
+| 17025 | lizard    |  3412 |          2015 |     29 |
+| 17026 | lizard    |  3010 |          2015 |     29 |
+| 17026 | lizard    |  3325 |          2016 |     29 |
+| 17027 | lizard    |  3001 |          2015 |     29 |
+| 17027 | lizard    |  3304 |          2015 |     15 |
+| 17027 | lizard    |  3409 |          2015 |     29 |
+| 21320 | olinguito |  2289 |          2015 |     38 |
+| 21320 | olinguito |  2290 |          2015 |     38 |
+| 21321 | olinguito |  NULL |          NULL |   NULL |
+| 12038 | porcupine |  2400 |          2015 |     38 |
+| 16002 | porcupine |  3321 |          2016 |     29 |
+| 16002 | porcupine |  3322 |          2016 |     29 |
+| 16002 | porcupine |  3323 |          2016 |     29 |
+| 16002 | porcupine |  3393 |          2015 |     29 |
+| 16002 | porcupine |  4103 |          2016 |     38 |
+| 16002 | porcupine |  4203 |          2015 |     29 |
+| 16002 | porcupine |  4233 |          2015 |     29 |
+| 16002 | porcupine |  4243 |          2015 |     38 |
+| 16002 | porcupine |  4255 |          2015 |     38 |
+| 17002 | porcupine |  3105 |          2015 |     29 |
+| 21004 | snake     |  NULL |          NULL |   NULL |
+| 21007 | snake     |  NULL |          NULL |   NULL |
+| 15001 | turtle    |  3288 |          2016 |     25 |
+| 15001 | turtle    |  3494 |          2016 |     25 |
+| 15001 | turtle    |  4101 |          2016 |     15 |
+| 15002 | turtle    |  4102 |          2016 |     15 |
+| 15002 | turtle    |  4514 |          2015 |     29 |
++-------+-----------+-------+---------------+--------+
+60 rows in set (0.00 sec)
+
+/* TAST 03 */ 
+select distinct CL.cl_id, cl_name_last
+from vt_clients CL
+join vt_animals AN on CL.cl_id = AN.cl_id
+where an_type NOT in ('snake','chelonian','crocodilian','lizard');
+
++-------+--------------+
+| cl_id | cl_name_last |
++-------+--------------+
+|  3560 | Monk         |
+|  3561 | Pickett      |
+|  5699 | Biederbecke  |
+|   411 | Carter       |
+|  3423 | Hawkins      |
+|  1825 | Harris       |
+|  6426 | Hawkins      |
+|  5689 | Biederbecke  |
+|  4087 | Turrentine   |
+|  4534 | Montgomery   |
+|  5698 | Biederbecke  |
+|  1852 | Dalrymple    |
++-------+--------------+
+12 rows in set (0.00 sec)
+
+/* TASK 04 */
+select CL.cl_id, CL.cl_name_last
+from vt_clients CL
+where CL.cl_id in (
+  select cl_id
+  from vt_animals 
+  where an_type in ('dog'))
+and cl_id in (
+  select cl_id
+  from vt_animals 
+  where an_type in ('snake','chelonian','crocodilian','lizard'));
+
++-------+--------------+
+| cl_id | cl_name_last |
++-------+--------------+
+|   411 | Carter       |
++-------+--------------+
+1 row in set (0.00 sec)
+
+select CL.cl_id, CL.cl_name_last
+from vt_clients CL
+where CL.cl_id in (
+  select cl_id
+  from vt_animals 
+  where an_type in ('dog'))
+and cl_id NOT in (
+  select cl_id
+  from vt_animals 
+  where an_type in ('snake','chelonian','crocodilian','lizard'));
+
++-------+--------------+
+| cl_id | cl_name_last |
++-------+--------------+
+|  1825 | Harris       |
+|  4087 | Turrentine   |
+|  5689 | Biederbecke  |
+|  6426 | Hawkins      |
++-------+--------------+
+4 rows in set (0.00 sec)
+
+/* TASK 06 */
+select distinct AN.an_id, AN.an_name
+from vt_animals AN
+join vt_exam_headers EH on AN.an_id = EH.an_id
+join vt_exam_details ED on EH.ex_id = ED.ex_id
+where srv_id NOT in (104, 105, 106, 108);
+
++-------+-----------------+
+| an_id | an_name         |
++-------+-----------------+
+| 10002 | Gutsy           |
+| 12035 | Mr Peanut       |
+| 12038 | Gutsy           |
+| 15001 | Big Mike        |
+| 15002 | George          |
+| 15401 | Pinkie          |
+| 16002 | Fritz           |
+| 16003 | Ursula          |
+| 17002 | Fritzchen       |
+| 17025 | 25              |
+| 17026 | 3P#_26          |
+| 17027 | 3P#_25          |
+| 19845 | Pinkie          |
+| 21001 | Yoggie          |
+| 21003 | Calvin Coolidge |
+| 21005 | Koshka          |
+| 21006 | Koshka          |
+| 21306 | Shadow          |
+| 21307 | Buddy           |
+| 21317 | Manfried        |
+| 21320 | Morris          |
++-------+-----------------+
+21 rows in set (0.00 sec)
+
+/* TASK 07 */
+select AN.an_id, AN.an_type, an_name, AN.cl_id
+from vt_animals AN
+where AN.an_id in (
+  select an_id
+    from vt_exam_headers
+    where YEAR(ex_date) = 2015
+) 
+and AN.an_id in (
+  select an_id
+    from vt_exam_headers
+    where YEAR(ex_date) = 2016 
+);
+
++-------+-----------+---------+-------+
+| an_id | an_type   | an_name | cl_id |
++-------+-----------+---------+-------+
+| 15002 | turtle    | George  |  5699 |
+| 16002 | porcupine | Fritz   |  3423 |
+| 16003 | cat       | Ursula  |  1825 |
+| 17025 | lizard    | 25      |  3561 |
+| 17026 | lizard    | 3P#_26  |  7152 |
++-------+-----------+---------+-------+
+5 rows in set (0.00 sec)
+
+/* TASK 08 */
+select AN.an_id, AN.an_type, an_name, AN.cl_id
+from vt_animals AN
+where AN.an_id in ( 
+  select an_id
+    from vt_exam_headers
+    where YEAR(ex_date) = YEAR(CURDATE())-1)
+and AN.an_id NOT in (
+  select an_id
+    from vt_exam_headers
+    where YEAR(ex_date) = YEAR(CURDATE())
+);
++-------+-----------+-----------------+-------+
+| an_id | an_type   | an_name         | cl_id |
++-------+-----------+-----------------+-------+
+| 10002 | cat       | Gutsy           |  3560 |
+| 11028 | bird      | NULL            |  3560 |
+| 11029 | bird      | NULL            |  3560 |
+| 12038 | porcupine | Gutsy           |  3560 |
+| 15401 | lizard    | Pinkie          |   411 |
+| 17002 | porcupine | Fritzchen       |  5699 |
+| 17027 | lizard    | 3P#_25          |  7152 |
+| 19845 | dog       | Pinkie          |  6426 |
+| 21001 | hedgehog  | Yoggie          |   411 |
+| 21003 | dog       | Calvin Coolidge |  6426 |
+| 21005 | dormouse  | Koshka          |  3423 |
+| 21006 | hamster   | Koshka          |  3423 |
+| 21306 | dog       | Shadow          |  4087 |
+| 21307 | dog       | Buddy           |  4087 |
+| 21316 | cat       | Etta            |  5698 |
+| 21317 | cat       | Manfried        |  5698 |
+| 21320 | olinguito | Morris          |  1852 |
++-------+-----------+-----------------+-------+
+17 rows in set (0.00 sec)
